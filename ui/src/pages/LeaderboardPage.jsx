@@ -126,109 +126,93 @@ const LeaderboardPage = () => {
 
         <div className="space-y-4">
           {leaderboard.length > 0 ? leaderboard.map((player, i) => (
-            <div
-              key={player.id || i}
-              className={`relative p-6 rounded-2xl border transition-all duration-300 transform hover:scale-[1.02] ${
-                darkMode
-                  ? 'bg-gray-800/50 border-gray-700'
-                  : 'bg-white/80 border-gray-200'
-              } ${
-                i === 0 ? 'border-yellow-400/50 bg-gradient-to-br from-gray-800 to-yellow-900/30' :
-                i === 1 ? 'border-slate-400/50' :
-                i === 2 ? 'border-amber-600/50' : ''
-              } shadow-lg backdrop-blur-sm`}
-              style={{ animation: 'fadeInUp 0.5s ease-out forwards', animationDelay: `${i * 100}ms`, opacity: 0 }}
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Avatar username={player.username} />
-                    <span className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                      darkMode ? 'border-gray-800' : 'border-white'
-                    } ${
-                      i === 0 ? 'bg-yellow-400 text-gray-900' :
-                      i === 1 ? 'bg-slate-300 text-gray-900' :
-                      i === 2 ? 'bg-amber-500 text-white' :
-                      darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-200 text-gray-700'
-                    }`}>
-                      {i + 1}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h4 className={`font-semibold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {player.username}
-                      </h4>
-                      {i === 0 && <Crown className="w-5 h-5 text-yellow-400" />}
-                      {i === 1 && <Medal className="w-5 h-5 text-slate-300" />}
-                      {i === 2 && <Medal className="w-5 h-5 text-amber-500" />}
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(player.completion_status)}`}>
-                        {player.completion_status}
-                      </span>
-                      {player.is_active && (
-                        <div className="flex items-center">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-1"></div>
-                          <span className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Live</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-1`}>Current Stage</div>
-                        <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center space-x-1`}>
-                          <span className="text-lg">{getStageEmoji(player.current_stage)}</span>
-                          <span>Stage {player.current_stage}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-1`}>
-                          {player.completion_status === 'completed' ? 'Total Keys' : 'Stage Keys'}
-                        </div>
-                        <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                          {player.keys_found}/{player.total_keys_possible} keys
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                          Stages: {player.stages_completed}/{getTotalStages()}
-                        </span>
-                        <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                          {Math.round((player.stages_completed / getTotalStages()) * 100)}%
-                        </span>
-                      </div>
-                      <div className={`w-full rounded-full h-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
                         <div
-                          className="bg-gradient-to-r from-cyan-400 to-fuchsia-500 h-2 rounded-full transition-all duration-500 ease-out"
-                          style={{ width: `${(player.stages_completed / getTotalStages()) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right flex-shrink-0 pl-4">
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {player.score}
-                  </div>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
-                    points
-                  </div>
-                  {player.completion_status === 'completed' && (
-                    <div className="flex items-center justify-end mt-2">
-                      <Crown className="h-4 w-4 text-yellow-500 mr-1" />
-                      <span className={`text-xs font-medium ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                        Champion
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )) : !loading && (
+                          key={player.id || i}
+                          className={`relative p-4 rounded-2xl border transition-all duration-300 transform hover:scale-[1.02] ${
+                            darkMode 
+                              ? 'bg-gray-800/50 border-gray-700' 
+                              : 'bg-white/80 border-gray-200'
+                          } ${
+                            i === 0 ? 'border-yellow-400/50 bg-gradient-to-br from-gray-800 to-yellow-900/30' :
+                            i === 1 ? 'border-slate-400/50' :
+                            i === 2 ? 'border-amber-600/50' : ''
+                          } shadow-lg backdrop-blur-sm`}
+                          style={{ animation: 'fadeInUp 0.5s ease-out forwards', animationDelay: `${i * 100}ms`, opacity: 0 }}
+                        >
+                          <div className="grid grid-cols-12 items-center gap-4">
+                            {/* Rank */}
+                            <div className="col-span-1 text-center">
+                              <span className={`text-2xl font-bold ${
+                                i === 0 ? 'text-yellow-400' :
+                                i === 1 ? 'text-slate-300' :
+                                i === 2 ? 'text-amber-500' :
+                                darkMode ? 'text-gray-400' : 'text-gray-500'
+                              }`}>
+                                {i + 1}
+                              </span>
+                            </div>
+            
+                            {/* Player Info */}
+                            <div className="col-span-4 flex items-center space-x-3">
+                              <Avatar username={player.username} />
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <h4 className={`font-semibold text-base ${darkMode ? 'text-white' : 'text-gray-900'}`}>{player.username}</h4>
+                                  {i === 0 && <Crown className="w-4 h-4 text-yellow-400" />}
+                                  {i === 1 && <Medal className="w-4 h-4 text-slate-300" />}
+                                  {i === 2 && <Medal className="w-4 h-4 text-amber-500" />}
+                                </div>
+                                <div className="flex items-center space-x-2 mt-1">
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(player.completion_status)}`}>
+                                    {player.completion_status}
+                                  </span>
+                                  {player.is_active && (
+                                    <div className="flex items-center">
+                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-1"></div>
+                                      <span className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Live</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+            
+                            {/* Progress */}
+                            <div className="col-span-4">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} flex items-center`}>
+                                  {getStageEmoji(player.current_stage)}
+                                  <span className="ml-1">Stage {player.current_stage}</span>
+                                </span>
+                                <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
+                                  {Math.round((player.stages_completed / getTotalStages()) * 100)}%
+                                </span>
+                              </div>
+                              <div className={`w-full rounded-full h-2.5 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                <div
+                                  className="bg-gradient-to-r from-cyan-400 to-fuchsia-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+                                  style={{ width: `${(player.stages_completed / getTotalStages()) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+            
+                            {/* Score & Keys */}
+                            <div className="col-span-3 text-right">
+                              <div className={`text-xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                {player.score} pts
+                              </div>
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                                {player.keys_found}/{player.total_keys_possible} keys
+                              </div>
+                              {player.completion_status === 'completed' && i === 0 && (
+                                <div className="flex items-center justify-end mt-1">
+                                  <span className={`text-xs font-medium ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                                    Champion
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>          )) : !loading && (
             <div className="text-center py-12">
               <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <div className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No rankings yet</div>
