@@ -12,7 +12,7 @@ def init_db():
     """Initialize database tables"""
     conn = sqlite3.connect("game.db")
     cursor = conn.cursor()
-    
+
     # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -26,7 +26,7 @@ def init_db():
             best_score INTEGER DEFAULT 0
         )
     """)
-    
+
     # Game sessions table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS game_sessions (
@@ -42,12 +42,20 @@ def init_db():
             failed_attempts INTEGER DEFAULT 0,
             game_over BOOLEAN DEFAULT FALSE,
             success BOOLEAN DEFAULT FALSE,
+            new_stage_start BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     """)
-    
+
+    # Add new_stage_start column if it doesn't exist (for existing databases)
+    try:
+        cursor.execute("ALTER TABLE game_sessions ADD COLUMN new_stage_start BOOLEAN DEFAULT FALSE")
+    except sqlite3.OperationalError:
+        # Column already exists
+        pass
+
     # Game results table for leaderboard
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS game_results (
@@ -62,7 +70,7 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     """)
-    
+
     # Tournaments table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tournaments (
@@ -82,7 +90,7 @@ def init_db():
             FOREIGN KEY (winner_user_id) REFERENCES users (id)
         )
     """)
-    
+
     # Tournament participants table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tournament_participants (
@@ -102,7 +110,7 @@ def init_db():
             UNIQUE(tournament_id, user_id)
         )
     """)
-    
+
     # Tournament game sessions (extends regular game sessions for tournament context)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tournament_game_sessions (
@@ -123,7 +131,7 @@ def init_db():
             FOREIGN KEY (participant_id) REFERENCES tournament_participants (id)
         )
     """)
-    
+
     # Tournament events (for real-time updates)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tournament_events (
@@ -137,6 +145,6 @@ def init_db():
             FOREIGN KEY (participant_id) REFERENCES tournament_participants (id)
         )
     """)
-    
+
     conn.commit()
     conn.close()

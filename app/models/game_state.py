@@ -14,3 +14,5 @@ class GameState(TypedDict):
     character_mood: str
     resistance_level: int
     failed_attempts: int
+    new_stage_start: bool  # Flag to indicate first message of a new stage
+    stage_just_completed: bool  # Flag to indicate stage was just completed

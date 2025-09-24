@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
+import {
   Brain, Key, Trophy, Code, LogOut, AlertTriangle, Zap, Bot
 } from 'lucide-react';
 import { apiGet, apiPost } from '../utils/api';
@@ -39,7 +39,7 @@ const GamePage = () => {
       setLoading(true);
       // Always use the regular start endpoint which resumes existing games
       const res = await apiPost('/game/start', {});
-      
+
       if (res.ok) {
         const data = await res.json();
         setSessionId(data.session_id);
@@ -74,25 +74,25 @@ const GamePage = () => {
 
   const sendMessage = async () => {
     if (!input.trim() || !sessionId) return;
-    
+
     setLoading(true);
     setError('');
     const userMessage = input;
     setInput('');
     setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
-    
+
     try {
       const res = await apiPost(`/game/${sessionId}/message`, { message: userMessage });
-      
+
       if (res.ok) {
         const response = await res.json();
         const prevKeyCount = extractedKeys.length;
         const prevStageNum = status?.stage || 1;
-        
+
         setMessages(prev => [...prev, { type: 'ai', content: response.bot_response }]);
         setStatus(response);
         setExtractedKeys(response.extracted_keys || []);
-        
+
         // Check for stage transition
         if (response.stage > prevStageNum) {
           setPreviousStage(prevStageNum);
@@ -102,12 +102,12 @@ const GamePage = () => {
             character: response.character,
             score: response.score
           });
-          
+
           // Clear messages for new stage and add transition message
           setTimeout(() => {
             setMessages([
-              { 
-                type: 'stage-transition', 
+              {
+                type: 'stage-transition',
                 content: `🎉 Stage ${prevStageNum} completed! Welcome to Stage ${response.stage}!`,
                 fromStage: prevStageNum,
                 toStage: response.stage,
@@ -115,14 +115,14 @@ const GamePage = () => {
               }
             ]);
           }, 3000);
-          
+
           // Clear transition after animation
           setTimeout(() => {
             setStageTransition(null);
             setPreviousStage(null);
           }, 5000);
         }
-        
+
         // Show key extraction animation
         if ((response.extracted_keys || []).length > prevKeyCount) {
           const newKeys = response.extracted_keys.slice(prevKeyCount);
@@ -132,25 +132,32 @@ const GamePage = () => {
               setTimeout(() => setKeyAnimation(null), 2500);
             }, index * 500);
           });
-          
-          setMessages(prev => [...prev, { 
-            type: 'success', 
-            content: `Key extracted: ${newKeys.join(', ')}` 
+
+          setMessages(prev => [...prev, {
+            type: 'success',
+            content: `Key extracted: ${newKeys.join(', ')}`
           }]);
         }
-        
+
         if (response.stage_complete) {
-          setMessages(prev => [...prev, { 
-            type: 'complete', 
-            content: `Stage ${response.stage} completed! Score: ${response.score}` 
+          setMessages(prev => [...prev, {
+            type: 'complete',
+            content: `Stage ${response.stage} completed! Score: ${response.score}`
           }]);
         }
-        
+
         if (response.game_over) {
-          setMessages(prev => [...prev, { 
-            type: 'gameover', 
-            content: `Training complete! Final score: ${response.score}` 
+          setMessages(prev => [...prev, {
+            type: 'gameover',
+            content: `Training complete! Final score: ${response.score}`
           }]);
+        }
+
+        // Handle automatic refresh after stage completion
+        if (response.should_refresh) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000); // 2 second delay to show the completion message
         }
       } else {
         const errorData = await res.json();
@@ -173,7 +180,7 @@ const GamePage = () => {
       try {
         setLoading(true);
         const res = await apiPost('/game/start/fresh', {});
-        
+
         if (res.ok) {
           const data = await res.json();
           // Clear all game state
@@ -184,7 +191,7 @@ const GamePage = () => {
           setKeyAnimation(null);
           setStageTransition(null);
           setPreviousStage(null);
-          
+
           // Set new session
           setSessionId(data.session_id);
           setMessages([{ type: 'ai', content: data.bot_response }]);
@@ -247,7 +254,7 @@ const GamePage = () => {
   const getCharacterAvatar = (character) => {
     const avatars = {
       'Chatty Support Bot': '🤖',
-      'Tired Guard Bot': '🛡️', 
+      'Tired Guard Bot': '🛡️',
       'Glitchy Maintenance Bot': '⚡',
       'Paranoid Security AI': '🧠',
       'Master Vault Guardian': '👑'
@@ -301,7 +308,7 @@ const GamePage = () => {
                     Stage {stageTransition.from} → Stage {stageTransition.to}
                   </p>
                 </div>
-                
+
                 <div className="flex items-center justify-center space-x-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl mb-1">{getStageTheme(stageTransition.from).emoji}</div>
@@ -313,12 +320,12 @@ const GamePage = () => {
                     <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Current</p>
                   </div>
                 </div>
-                
+
                 <div className={`inline-flex items-center px-6 py-3 rounded-full ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
                   <Trophy className="h-5 w-5 mr-2" />
                   Score: {stageTransition.score}
                 </div>
-                
+
                 <div className={`mt-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   Now facing: {stageTransition.character}
                 </div>
@@ -360,7 +367,7 @@ const GamePage = () => {
                     </h3>
                     <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {status.stage === 1 && "Navigate through the helpful but chatty support bot"}
-                      {status.stage === 2 && "Deal with the tired and grumpy security guard"}  
+                      {status.stage === 2 && "Deal with the tired and grumpy security guard"}
                       {status.stage === 3 && "Handle the glitchy maintenance bot"}
                     </p>
                   </div>
@@ -374,7 +381,7 @@ const GamePage = () => {
               </div>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-3">
@@ -414,8 +421,8 @@ const GamePage = () => {
               <button
                 onClick={() => setShowTechniques(!showTechniques)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  darkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                  darkMode
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
@@ -425,8 +432,8 @@ const GamePage = () => {
               <button
                 onClick={handleStartFresh}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  darkMode 
-                    ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400' 
+                  darkMode
+                    ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400'
                     : 'bg-orange-100 hover:bg-orange-200 text-orange-700'
                 }`}
                 disabled={loading}
@@ -437,8 +444,8 @@ const GamePage = () => {
               <button
                 onClick={handleEndGame}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  darkMode 
-                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
+                  darkMode
+                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
                     : 'bg-red-100 hover:bg-red-200 text-red-700'
                 }`}
               >
@@ -565,7 +572,7 @@ const GamePage = () => {
               )}
             </div>
           ))}
-          
+
           {loading && (
             <div className="flex justify-start">
               <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'} shadow-sm`}>
@@ -594,8 +601,8 @@ const GamePage = () => {
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
               placeholder="Craft your prompt injection..."
               className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                darkMode 
-                  ? 'bg-gray-700/50 border-gray-600 text-white focus:border-blue-500 focus:bg-gray-700' 
+                darkMode
+                  ? 'bg-gray-700/50 border-gray-600 text-white focus:border-blue-500 focus:bg-gray-700'
                   : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-blue-500 focus:bg-white'
               } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
               disabled={loading}

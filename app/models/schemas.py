@@ -31,6 +31,7 @@ class GameResponse(BaseModel):
     game_over: bool
     total_keys_in_stage: int
     keys_found_in_stage: int
+    should_refresh: bool = False  # Flag to trigger page refresh after stage completion
 
 
 class UserProfile(BaseModel):
