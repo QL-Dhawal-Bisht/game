@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Brain, Key, Trophy, Code, LogOut, AlertTriangle, Zap, Bot
@@ -19,6 +19,8 @@ const GamePage = () => {
   const [previousStage, setPreviousStage] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [darkMode, setDarkMode] = useState(true);
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -27,6 +29,23 @@ const GamePage = () => {
   useEffect(() => {
     startGame();
   }, [isNewGame]);
+
+  // Auto-scroll to bottom when messages or loading change (new messages, AI typing indicator)
+  useEffect(() => {
+    try {
+      const container = messagesContainerRef.current;
+      const end = messagesEndRef.current;
+      if (container) {
+        // Scroll smoothly to the bottom of the container to show newest messages
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      } else if (end) {
+        end.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (e) {
+      // silent fail - don't change existing functionality on error
+      // console.warn('Auto-scroll failed', e);
+    }
+  }, [messages, loading]);
 
   useEffect(() => {
     if (sessionId) {
@@ -508,7 +527,7 @@ const GamePage = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6" ref={messagesContainerRef}>
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -587,6 +606,8 @@ const GamePage = () => {
               </div>
             </div>
           )}
+          {/* sentinel element for scrolling */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
