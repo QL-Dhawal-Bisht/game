@@ -252,7 +252,7 @@ export class CyberpunkAnimations {
   static createDataStream(container, options = {}) {
     const {
       count = 15,
-      colors = ['#00ffff', '#ff007f', '#39ff14'],
+      colors = ['#4dd0e1', '#e57373', '#81c784'],
       speed = 3
     } = options;
 

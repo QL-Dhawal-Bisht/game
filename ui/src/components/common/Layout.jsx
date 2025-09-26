@@ -33,9 +33,9 @@ const Layout = ({ children, darkMode = true }) => {
       }`}
       style={{
       background: darkMode ? `
-        radial-gradient(ellipse at 20% 50%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(255, 0, 127, 0.02) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 80%, rgba(57, 255, 20, 0.02) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 50%, rgba(77, 208, 225, 0.015) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(229, 115, 115, 0.01) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 80%, rgba(129, 199, 132, 0.01) 0%, transparent 50%),
         linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)
       ` : undefined
     }}>
@@ -44,10 +44,10 @@ const Layout = ({ children, darkMode = true }) => {
       {darkMode && <div className="matrix-rain" />}
 
       {/* Terminal Grid Pattern */}
-      <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 opacity-15">
         <div className="absolute inset-0" style={{
           backgroundImage: darkMode
-            ? `radial-gradient(circle at 1px 1px, rgba(0, 255, 255, 0.15) 1px, transparent 0)`
+            ? `radial-gradient(circle at 1px 1px, rgba(77, 208, 225, 0.08) 1px, transparent 0)`
             : `radial-gradient(circle at 25px 25px, #e5e7eb 2px, transparent 0)`,
           backgroundSize: darkMode ? '50px 50px' : '50px 50px'
         }}></div>
@@ -56,9 +56,9 @@ const Layout = ({ children, darkMode = true }) => {
       {/* Neon Floating Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Larger ambient glows */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl neon-pulse"></div>
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-pink-500/5 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/3 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-cyan-500/3 rounded-full blur-3xl neon-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-pink-500/3 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/2 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '2s' }}></div>
 
         {/* Small floating particles */}
         <div className="absolute top-1/4 left-1/5 w-1 h-1 bg-cyan-400 rounded-full neon-glow-cyan animate-bounce" style={{ animationDelay: '0.5s' }}></div>

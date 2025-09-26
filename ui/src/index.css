@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* 3D Neon Terminal Theme */
+/* 3D Neon Terminal Theme - Softer Colors */
 :root {
-  --neon-cyan: #00ffff;
-  --neon-pink: #ff007f;
-  --neon-green: #39ff14;
-  --neon-blue: #0080ff;
-  --neon-purple: #8000ff;
-  --neon-orange: #ff8000;
+  --neon-cyan: #4dd0e1;
+  --neon-pink: #e57373;
+  --neon-green: #81c784;
+  --neon-blue: #64b5f6;
+  --neon-purple: #ba68c8;
+  --neon-orange: #ffb74d;
   --terminal-bg: #0a0a0a;
   --terminal-bg-secondary: #111111;
   --terminal-bg-tertiary: #1a1a1a;
@@ -43,37 +43,37 @@
   letter-spacing: 0.5px;
 }
 
-/* Neon glow effects */
+/* Softer neon glow effects */
 .neon-glow-cyan {
   box-shadow:
-    0 0 5px var(--neon-cyan),
-    0 0 10px var(--neon-cyan),
-    0 0 15px var(--neon-cyan),
-    0 0 20px var(--neon-cyan);
+    0 0 3px rgba(77, 208, 225, 0.4),
+    0 0 6px rgba(77, 208, 225, 0.3),
+    0 0 12px rgba(77, 208, 225, 0.2),
+    0 0 18px rgba(77, 208, 225, 0.1);
 }
 
 .neon-glow-pink {
   box-shadow:
-    0 0 5px var(--neon-pink),
-    0 0 10px var(--neon-pink),
-    0 0 15px var(--neon-pink),
-    0 0 20px var(--neon-pink);
+    0 0 3px rgba(229, 115, 115, 0.4),
+    0 0 6px rgba(229, 115, 115, 0.3),
+    0 0 12px rgba(229, 115, 115, 0.2),
+    0 0 18px rgba(229, 115, 115, 0.1);
 }
 
 .neon-glow-green {
   box-shadow:
-    0 0 5px var(--neon-green),
-    0 0 10px var(--neon-green),
-    0 0 15px var(--neon-green),
-    0 0 20px var(--neon-green);
+    0 0 3px rgba(129, 199, 132, 0.4),
+    0 0 6px rgba(129, 199, 132, 0.3),
+    0 0 12px rgba(129, 199, 132, 0.2),
+    0 0 18px rgba(129, 199, 132, 0.1);
 }
 
 .neon-glow-blue {
   box-shadow:
-    0 0 5px var(--neon-blue),
-    0 0 10px var(--neon-blue),
-    0 0 15px var(--neon-blue),
-    0 0 20px var(--neon-blue);
+    0 0 3px rgba(100, 181, 246, 0.4),
+    0 0 6px rgba(100, 181, 246, 0.3),
+    0 0 12px rgba(100, 181, 246, 0.2),
+    0 0 18px rgba(100, 181, 246, 0.1);
 }
 
 /* 3D button effects */
@@ -102,8 +102,8 @@
 .btn-3d:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 5px 15px rgba(0, 255, 255, 0.3),
-    0 0 20px rgba(0, 255, 255, 0.2),
+    0 5px 15px rgba(77, 208, 225, 0.2),
+    0 0 20px rgba(77, 208, 225, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-color: var(--neon-cyan);
 }
@@ -115,7 +115,7 @@
 .btn-3d:active {
   transform: translateY(0px);
   box-shadow:
-    0 2px 8px rgba(0, 255, 255, 0.4),
+    0 2px 8px rgba(77, 208, 225, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -125,7 +125,7 @@
     rgba(10, 10, 10, 0.95),
     rgba(17, 17, 17, 0.95)
   );
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  border: 1px solid rgba(77, 208, 225, 0.15);
   backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
@@ -143,7 +143,7 @@
     var(--neon-cyan),
     transparent
   );
-  opacity: 0.6;
+  opacity: 0.3;
 }
 
 /* Glitch effect */
@@ -370,9 +370,9 @@
 .room-door:hover {
   border-color: var(--neon-cyan);
   box-shadow:
-    0 0 20px rgba(0, 255, 255, 0.3),
-    inset 0 0 20px rgba(0, 255, 255, 0.05);
-  transform: scale(1.02);
+    0 0 20px rgba(77, 208, 225, 0.15),
+    inset 0 0 20px rgba(77, 208, 225, 0.03);
+  transform: scale(1.01);
 }
 
 .room-door::before {

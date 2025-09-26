@@ -43,11 +43,11 @@ const CyberpunkButton = ({
 
       // Add energy pulse
       CyberpunkAnimations.createEnergyPulse(buttonRef.current, {
-        color: variant === 'primary' ? '#00ffff' :
-              variant === 'danger' ? '#ff0040' :
-              variant === 'success' ? '#39ff14' :
-              '#ffff00',
-        intensity: 0.2,
+        color: variant === 'primary' ? '#4dd0e1' :
+              variant === 'danger' ? '#e57373' :
+              variant === 'success' ? '#81c784' :
+              '#ffb74d',
+        intensity: 0.15,
         duration: 2
       });
     }
@@ -83,7 +83,7 @@ const CyberpunkButton = ({
       height: ${size}px;
       left: ${x}px;
       top: ${y}px;
-      background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(77, 208, 225, 0.2) 0%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
       z-index: 10;
