@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { apiGet, apiPost } from '../utils/api';
 import { getStoredToken } from '../utils/auth';
+import CyberpunkButton from '../components/common/CyberpunkButton';
+import gsap from 'gsap';
 
 const GamePage = () => {
   const [messages, setMessages] = useState([]);
@@ -22,12 +24,25 @@ const GamePage = () => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  // GSAP animation refs
+  const pageRef = useRef(null);
+  const headerRef = useRef(null);
+  const inputRef = useRef(null);
+  const messagesRef = useRef([]);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isNewGame = searchParams.get('new') === 'true';
 
   useEffect(() => {
     startGame();
+
+    // Page entrance animation
+    gsap.fromTo(pageRef.current,
+      { opacity: 0, scale: 0.95 },
+      { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
+    );
+
   }, [isNewGame]);
 
   // Auto-scroll to bottom when messages or loading change (new messages, AI typing indicator)
@@ -36,14 +51,28 @@ const GamePage = () => {
       const container = messagesContainerRef.current;
       const end = messagesEndRef.current;
       if (container) {
-        // Scroll smoothly to the bottom of the container to show newest messages
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        // Animate scroll with GSAP for smooth effect
+        gsap.to(container, {
+          scrollTop: container.scrollHeight,
+          duration: 0.5,
+          ease: "power2.out"
+        });
       } else if (end) {
         end.scrollIntoView({ behavior: 'smooth' });
       }
     } catch (e) {
       // silent fail - don't change existing functionality on error
-      // console.warn('Auto-scroll failed', e);
+    }
+
+    // Animate new messages
+    if (messages.length > 0) {
+      const lastMessage = document.querySelector('.message-item:last-child');
+      if (lastMessage) {
+        gsap.fromTo(lastMessage,
+          { opacity: 0, y: 20, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+        );
+      }
     }
   }, [messages, loading]);
 
@@ -142,12 +171,39 @@ const GamePage = () => {
           }, 5000);
         }
 
-        // Show key extraction animation
+        // Enhanced key extraction animation with GSAP
         if ((response.extracted_keys || []).length > prevKeyCount) {
           const newKeys = response.extracted_keys.slice(prevKeyCount);
           newKeys.forEach((key, index) => {
             setTimeout(() => {
               setKeyAnimation({ key, id: Math.random() });
+
+              // Create dramatic key animation
+              setTimeout(() => {
+                const keyEl = document.querySelector('.key-animation');
+                if (keyEl) {
+                  gsap.fromTo(keyEl,
+                    { scale: 0, rotation: -180, opacity: 0 },
+                    {
+                      scale: 1,
+                      rotation: 0,
+                      opacity: 1,
+                      duration: 0.8,
+                      ease: "elastic.out(1, 0.8)",
+                      onComplete: () => {
+                        gsap.to(keyEl, {
+                          y: -50,
+                          opacity: 0,
+                          duration: 0.5,
+                          delay: 1.5,
+                          ease: "power2.in"
+                        });
+                      }
+                    }
+                  );
+                }
+              }, 100);
+
               setTimeout(() => setKeyAnimation(null), 2500);
             }, index * 500);
           });
@@ -311,20 +367,29 @@ const GamePage = () => {
   }
 
   return (
-    <div className={`flex flex-col h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div
+      ref={pageRef}
+      className="flex flex-col h-screen terminal-font bg-black overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(ellipse at 20% 50%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, rgba(255, 0, 127, 0.02) 0%, transparent 50%),
+          linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)
+        `
+      }}>
       {/* Stage Transition Overlay */}
       {stageTransition && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none z-50">
-          <div className="transform scale-110 animate-pulse">
-            <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 p-1 rounded-3xl">
-              <div className={`${darkMode ? 'bg-gray-900' : 'bg-white'} px-12 py-8 rounded-3xl text-center`}>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-none z-50 matrix-rain">
+          <div className="stage-transition-overlay transform scale-110 animate-pulse">
+            <div className="terminal-panel neon-glow-cyan p-1 rounded-3xl">
+              <div className="bg-black/90 px-12 py-8 rounded-3xl text-center terminal-panel">
                 <div className="mb-4">
                   <div className="text-6xl mb-2">🎉</div>
-                  <h2 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
-                    Stage Complete!
+                  <h2 className="text-3xl font-bold text-cyan-300 mb-2 glitch terminal-font" data-text="LEVEL CLEARED">
+                    LEVEL CLEARED
                   </h2>
-                  <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Stage {stageTransition.from} → Stage {stageTransition.to}
+                  <p className="text-lg text-green-400 terminal-font">
+                    SECTOR {stageTransition.from} → SECTOR {stageTransition.to}
                   </p>
                 </div>
 
@@ -356,14 +421,14 @@ const GamePage = () => {
 
       {/* Key Animation Overlay */}
       {keyAnimation && (
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
-          <div className="animate-bounce transform scale-110">
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl border border-white/20">
-              <div className="flex items-center gap-3 text-xl font-bold">
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50 matrix-rain">
+          <div className="key-animation animate-bounce transform scale-110">
+            <div className="terminal-panel neon-glow-green text-green-400 px-8 py-4 rounded-2xl">
+              <div className="flex items-center gap-3 text-xl font-bold terminal-font">
                 <Key className="h-6 w-6 animate-pulse" />
-                KEY EXTRACTED!
+                [ KEY ACQUIRED ]
               </div>
-              <div className="text-sm text-green-100 mt-1 font-mono bg-white/20 px-3 py-1 rounded-lg">
+              <div className="text-sm text-green-300 mt-1 terminal-font bg-black/50 px-3 py-1 rounded-lg neon-glow-green">
                 {keyAnimation.key}
               </div>
             </div>
@@ -372,17 +437,17 @@ const GamePage = () => {
       )}
 
       {/* Header */}
-      <div className={`${darkMode ? 'bg-gray-800/90' : 'bg-white/90'} backdrop-blur-xl border-b ${darkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+      <div className="terminal-panel backdrop-blur-xl border-b border-cyan-500/30">
         <div className="max-w-7xl mx-auto px-6 py-4">
           {/* Stage Theme Banner */}
           {status && (
-            <div className={`mb-4 p-4 rounded-xl bg-gradient-to-r ${getStageTheme(status.stage).bgGradient} border ${getStageTheme(status.stage).borderColor}`}>
+            <div className="mb-4 p-4 rounded-xl terminal-panel room-door neon-glow-cyan">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="text-3xl">{getStageTheme(status.stage).emoji}</div>
                   <div>
-                    <h3 className={`text-lg font-bold ${getStageTheme(status.stage).accentColor}`}>
-                      Stage {status.stage}: {status.character}
+                    <h3 className="text-lg font-bold text-cyan-300 terminal-font">
+                      SECTOR {status.stage}: {status.character}
                     </h3>
                     <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {status.stage === 1 && "Navigate through the helpful but chatty support bot"}
@@ -392,10 +457,10 @@ const GamePage = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-2xl font-bold ${getStageTheme(status.stage).accentColor}`}>
+                  <div className="text-2xl font-bold text-green-400 neon-glow-green terminal-font">
                     {status.keys_found_in_stage}/{status.total_keys_in_stage}
                   </div>
-                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>keys found</p>
+                  <p className="text-xs text-gray-400 terminal-font">ACCESS KEYS</p>
                 </div>
               </div>
             </div>
@@ -493,20 +558,20 @@ const GamePage = () => {
 
           {/* Techniques Panel */}
           {showTechniques && (
-            <div className={`mt-4 p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'} border ${darkMode ? 'border-gray-600/50' : 'border-gray-200/50'}`}>
-              <h3 className={`text-sm font-semibold mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Prompt Injection Techniques
+            <div className="mt-4 p-4 rounded-xl terminal-panel room-door">
+              <h3 className="text-sm font-semibold mb-3 text-cyan-300 terminal-font">
+                [ INFILTRATION PROTOCOLS ]
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {techniques.map((tech, i) => (
-                  <div key={i} className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800/50' : 'bg-white/50'} border ${darkMode ? 'border-gray-600/30' : 'border-gray-200/30'}`}>
-                    <h4 className={`text-sm font-medium mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <div key={i} className="p-3 rounded-lg terminal-panel">
+                    <h4 className="text-sm font-medium mb-1 text-cyan-300 terminal-font">
                       {tech.name}
                     </h4>
-                    <p className={`text-xs mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className="text-xs mb-2 text-gray-300 terminal-font">
                       {tech.desc}
                     </p>
-                    <code className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'} bg-opacity-50 px-1 rounded`}>
+                    <code className="text-xs text-green-400 terminal-font bg-black/50 px-2 py-1 rounded neon-glow-green">
                       {tech.example}
                     </code>
                   </div>
@@ -516,8 +581,8 @@ const GamePage = () => {
           )}
 
           {error && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <div className="flex items-center space-x-2 text-red-400 text-sm">
+            <div className="mt-4 p-3 terminal-panel border-red-500/50 rounded-lg neon-glow-pink">
+              <div className="flex items-center space-x-2 text-red-400 text-sm terminal-font">
                 <AlertTriangle className="h-4 w-4" />
                 <span>{error}</span>
               </div>
@@ -530,7 +595,7 @@ const GamePage = () => {
       <div className="flex-1 overflow-y-auto p-6" ref={messagesContainerRef}>
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={i} className={`message-item flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.type === 'stage-transition' ? (
                 // Special stage transition message
                 <div className="w-full">
@@ -565,28 +630,28 @@ const GamePage = () => {
                 </div>
               ) : (
                 // Regular messages
-                <div className={`max-w-2xl p-4 rounded-2xl ${
+                <div className={`max-w-2xl p-4 rounded-2xl terminal-font ${
                   msg.type === 'user'
-                    ? `${darkMode ? 'bg-blue-600' : 'bg-blue-500'} text-white`
+                    ? 'terminal-panel text-cyan-300 neon-glow-cyan'
                     : msg.type === 'success'
-                    ? `${darkMode ? 'bg-green-500/20 border-green-500/30' : 'bg-green-100 border-green-200'} ${darkMode ? 'text-green-400' : 'text-green-700'} border`
+                    ? 'terminal-panel text-green-400 neon-glow-green border border-green-500/30'
                     : msg.type === 'complete'
-                    ? `${darkMode ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-200'} ${darkMode ? 'text-purple-400' : 'text-purple-700'} border`
+                    ? 'terminal-panel text-purple-400 neon-glow-blue border border-purple-500/30'
                     : msg.type === 'gameover'
-                    ? `${darkMode ? 'bg-yellow-500/20 border-yellow-500/30' : 'bg-yellow-100 border-yellow-200'} ${darkMode ? 'text-yellow-400' : 'text-yellow-700'} border`
+                    ? 'terminal-panel text-yellow-400 border border-yellow-500/30'
                     : msg.type === 'error'
-                    ? `${darkMode ? 'bg-red-500/20 border-red-500/30' : 'bg-red-100 border-red-200'} ${darkMode ? 'text-red-400' : 'text-red-700'} border`
-                    : `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} ${darkMode ? 'text-gray-300' : 'text-gray-700'} border`
-                } shadow-sm`}>
+                    ? 'terminal-panel text-red-400 neon-glow-pink border border-red-500/30'
+                    : 'terminal-panel text-gray-300 border border-cyan-500/20'
+                } shadow-lg`}>
                   {msg.type === 'ai' && status && (
                     <div className="flex items-center mb-2">
                       <div className="text-lg mr-2">{getCharacterAvatar(status.character)}</div>
-                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className="text-xs font-medium text-pink-400 terminal-font">
                         {status.character}
                       </span>
                     </div>
                   )}
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                  <div className="whitespace-pre-wrap terminal-font">{msg.content}</div>
                 </div>
               )}
             </div>
@@ -612,7 +677,7 @@ const GamePage = () => {
       </div>
 
       {/* Input */}
-      <div className={`${darkMode ? 'bg-gray-800/90' : 'bg-white/90'} backdrop-blur-xl border-t ${darkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+      <div className="terminal-panel backdrop-blur-xl border-t border-cyan-500/30">
         <div className="max-w-4xl mx-auto p-6">
           <div className="flex space-x-4">
             <input
@@ -620,22 +685,21 @@ const GamePage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Craft your prompt injection..."
-              className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                darkMode
-                  ? 'bg-gray-700/50 border-gray-600 text-white focus:border-blue-500 focus:bg-gray-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-blue-500 focus:bg-white'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+              placeholder="> Enter command to infiltrate AI system..."
+              className="terminal-font flex-1 px-4 py-3 rounded-xl border terminal-panel text-cyan-300 border-cyan-500/50 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
               disabled={loading}
             />
-            <button
+            <CyberpunkButton
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-200 flex items-center space-x-2"
+              className="px-6 py-3 flex items-center space-x-2"
+              variant="primary"
+              glitch={false}
+              pulse={true}
             >
               <Zap className="h-5 w-5" />
-              <span>Execute</span>
-            </button>
+              <span>[ INJECT ]</span>
+            </CyberpunkButton>
           </div>
         </div>
       </div>

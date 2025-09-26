@@ -1,24 +1,93 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { CyberpunkAnimations } from '../../utils/animations';
 
-const Layout = ({ children, darkMode }) => {
+const Layout = ({ children, darkMode = true }) => {
+  const containerRef = useRef(null);
+  const matrixRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current && darkMode) {
+      // Create matrix rain effect
+      CyberpunkAnimations.createMatrixRain(containerRef.current, {
+        count: 25,
+        speed: 3,
+        chars: '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'
+      });
+
+      // Create data streams
+      CyberpunkAnimations.createDataStream(containerRef.current, {
+        count: 12,
+        colors: ['#00ffff', '#ff007f', '#39ff14', '#0080ff'],
+        speed: 4
+      });
+    }
+  }, [darkMode]);
+
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Background Grid Pattern */}
-      <div className="absolute inset-0 opacity-20">
+    <div
+      ref={containerRef}
+      className={`min-h-screen terminal-font transition-all duration-500 relative overflow-hidden ${
+        darkMode
+          ? 'bg-gradient-to-br from-black via-gray-900 to-gray-800'
+          : 'bg-gray-50'
+      }`}
+      style={{
+      background: darkMode ? `
+        radial-gradient(ellipse at 20% 50%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 0, 127, 0.02) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 80%, rgba(57, 255, 20, 0.02) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)
+      ` : undefined
+    }}>
+
+      {/* Matrix Rain Background */}
+      {darkMode && <div className="matrix-rain" />}
+
+      {/* Terminal Grid Pattern */}
+      <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25px 25px, ${darkMode ? '#374151' : '#e5e7eb'} 2px, transparent 0)`,
-          backgroundSize: '50px 50px'
+          backgroundImage: darkMode
+            ? `radial-gradient(circle at 1px 1px, rgba(0, 255, 255, 0.15) 1px, transparent 0)`
+            : `radial-gradient(circle at 25px 25px, #e5e7eb 2px, transparent 0)`,
+          backgroundSize: darkMode ? '50px 50px' : '50px 50px'
         }}></div>
       </div>
 
-      {/* Floating Elements */}
+      {/* Neon Floating Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 left-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-        <div className="absolute top-1/3 left-1/4 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce delay-200"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-3 h-3 bg-purple-400/50 rounded-full animate-bounce delay-500"></div>
+        {/* Larger ambient glows */}
+        <div className="absolute top-20 right-20 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl neon-pulse"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-pink-500/5 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/3 rounded-full blur-3xl neon-pulse" style={{ animationDelay: '2s' }}></div>
+
+        {/* Small floating particles */}
+        <div className="absolute top-1/4 left-1/5 w-1 h-1 bg-cyan-400 rounded-full neon-glow-cyan animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-pink-400 rounded-full neon-glow-pink animate-bounce" style={{ animationDelay: '1.2s' }}></div>
+        <div className="absolute top-1/2 left-3/4 w-1 h-1 bg-green-400 rounded-full neon-glow-green animate-bounce" style={{ animationDelay: '0.8s' }}></div>
+        <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-blue-400 rounded-full neon-glow-blue animate-bounce" style={{ animationDelay: '1.5s' }}></div>
+
+        {/* Scanning lines effect */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute w-full h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent"
+            style={{
+              top: '20%',
+              animation: 'matrix-fall 8s ease-in-out infinite',
+              animationDelay: '0s'
+            }}
+          ></div>
+          <div
+            className="absolute w-full h-px bg-gradient-to-r from-transparent via-pink-500/20 to-transparent"
+            style={{
+              top: '60%',
+              animation: 'matrix-fall 12s ease-in-out infinite',
+              animationDelay: '2s'
+            }}
+          ></div>
+        </div>
       </div>
 
+      {/* Content with terminal styling */}
       <div className="relative z-10">
         {children}
       </div>

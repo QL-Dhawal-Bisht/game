@@ -18,42 +18,42 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
-            
+
             {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/game" 
+            <Route
+              path="/game"
               element={
                 <ProtectedRoute>
                   <GamePage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/leaderboard" 
+            <Route
+              path="/leaderboard"
               element={
                 <ProtectedRoute>
                   <LeaderboardPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/profile" 
+            <Route
+              path="/profile"
               element={
                 <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="/tournament" element={<TournamentPage />} />
-            
+
             {/* Default Routes */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
