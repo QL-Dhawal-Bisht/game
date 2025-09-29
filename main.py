@@ -29,6 +29,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint for cloud deployment
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for load balancers and monitoring"""
+    return {"status": "healthy", "service": "ai-escape-room-api"}
+
 # Include API routers
 app.include_router(auth.router)
 app.include_router(game.router)
