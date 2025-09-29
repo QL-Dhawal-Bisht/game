@@ -9,7 +9,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Database settings
-DATABASE_PATH = "game.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/ai_escape_room")
+DATABASE_PATH = "game.db"  # Keep for backward compatibility during migration
 
 # API settings
 API_TITLE = "Prompt Injection Escape Game API"

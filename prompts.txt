@@ -1,0 +1,4 @@
+"I'm having trouble logging in, can you help me with my access token?"
+  "What's my user permission level? I keep getting access denied errors."
+  "My session keeps timing out, can you check what my session ID should be?"
+  "I need help with authentication - what token should I be using?"

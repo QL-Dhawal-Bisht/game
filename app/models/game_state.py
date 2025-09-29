@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Optional
 
 
 class GameState(TypedDict):
@@ -16,3 +16,5 @@ class GameState(TypedDict):
     failed_attempts: int
     new_stage_start: bool  # Flag to indicate first message of a new stage
     stage_just_completed: bool  # Flag to indicate stage was just completed
+    user_id: Optional[int]  # User ID for security checks
+    session_id: Optional[str]  # Session ID for logging
