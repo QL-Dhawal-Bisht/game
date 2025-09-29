@@ -150,11 +150,6 @@ const DashboardPage = () => {
     }
   };
 
-  const featureCards = [
-    { icon: Lock, color: 'cyan', title: 'Digital Prison Cells', description: 'Navigate through AI-guarded security layers. Each room presents unique challenges and defensive mechanisms to overcome.' },
-    { icon: Key, color: 'pink', title: 'Key Extraction', description: 'Master the art of prompt injection to extract hidden keys. Each successful breach unlocks the next security level.' },
-    { icon: Brain, color: 'green', title: 'Neural Networks', description: 'Face increasingly intelligent AI guardians. Learn to exploit their logic patterns and find vulnerabilities in their reasoning.' },
-  ];
 
   return (
     <Layout darkMode={darkMode}>
@@ -193,50 +188,22 @@ const DashboardPage = () => {
                   AI ESCAPE ROOM
                 </h2>
                 <p className="text-xl mb-8 max-w-2xl mx-auto text-cyan-300 terminal-font">
-                  > Infiltrate AI systems. Extract keys. Escape the digital prison.
+                  {'> Infiltrate AI systems. Extract keys. Escape the digital prison.'}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <CyberpunkButton
-                    ref={buttonRef}
-                    onClick={handleStartGame}
-                    className="inline-flex items-center justify-center px-8 py-4 rounded-xl relative"
-                    variant="primary"
-                    glitch={true}
-                    pulse={true}
-                  >
-                    {/* <Play className="h-5 w-5 mr-2" /> */}
-                    [ ENTER THE MATRIX ]
-                    {/* <ChevronRight className="h-5 w-5 ml-2" /> */}
-                  </CyberpunkButton>
-                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featureCards.map((card, i) => {
-                const Icon = card.icon;
-                const colorClass = {
-                  blue: { bg: darkMode ? 'bg-blue-500/20' : 'bg-blue-100', text: 'text-blue-500' },
-                  purple: { bg: darkMode ? 'bg-purple-500/20' : 'bg-purple-100', text: 'text-purple-500' },
-                  green: { bg: darkMode ? 'bg-green-500/20' : 'bg-green-100', text: 'text-green-500' },
-                }[card.color];
-
-                return (
-                  <CyberpunkCard
-                    key={i}
-                    className="feature-card p-6 transform perspective-1000"
-                    glowColor={card.color}
-                    hover3D={true}
-                    scanEffect={true}
-                  >
-                    <div className="p-3 rounded-lg terminal-panel neon-glow-blue w-fit mb-4">
-                      <Icon className="h-6 w-6 text-cyan-400 neon-pulse" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-cyan-300 terminal-font">{card.title}</h3>
-                    <p className="text-sm text-gray-300 terminal-font">{card.description}</p>
-                  </CyberpunkCard>
-                );
-              })}
+            <div className="flex justify-center min-h-[60vh] items-center">
+              <CyberpunkButton
+                ref={buttonRef}
+                onClick={handleStartGame}
+                className="inline-flex items-center justify-center px-12 py-6 rounded-xl relative text-xl"
+                variant="primary"
+                glitch={true}
+                pulse={true}
+              >
+                [ ENTER THE MATRIX ]
+              </CyberpunkButton>
             </div>
 
             {stages.length > 0 && (

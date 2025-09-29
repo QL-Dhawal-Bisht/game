@@ -282,7 +282,9 @@ async def send_message(
             resistance_level=session["resistance_level"],
             failed_attempts=session["failed_attempts"],
             new_stage_start=session["new_stage_start"] if "new_stage_start" in session.keys() else False,
-            stage_just_completed=False  # Initialize as False
+            stage_just_completed=False,  # Initialize as False
+            user_id=user["id"],  # Add user_id for security checks
+            session_id=session_id  # Add session_id for logging
         )
 
         # Process through game workflow

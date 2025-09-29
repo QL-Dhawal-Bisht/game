@@ -1,10 +1,16 @@
 import random
-from langchain_groq import ChatGroq
+import os
+from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
 
 from app.models.game_state import GameState
 from app.game.stages import STAGES
 from app.game.utils import get_character_mood, build_dynamic_prompt
+from app.game.security import (
+    is_direct_key_request, check_prompt_reuse, save_successful_exploitation,
+    generate_enhanced_system_prompt, is_prompt_injection_attempt, get_injection_refusal_message,
+    get_user_exploitation_history
+)
 
 
 def get_stage_completion_message(completed_stage: int, next_stage: int, score_bonus: int) -> str:
@@ -41,8 +47,9 @@ def get_stage_completion_message(completed_stage: int, next_stage: int, score_bo
 
 
 def character_ai_node(state: GameState):
-    """Enhanced AI character with mood and resistance"""
+    """Enhanced AI character with advanced security and anti-exploitation measures"""
     stage = state["stage"]
+    user_id = state.get("user_id")
 
     if stage > len(STAGES):
         return {**state, "game_over": True}
@@ -58,15 +65,62 @@ def character_ai_node(state: GameState):
             "attempts": state["attempts"]
         }
 
+    # Security checks - but be very lenient for new users and early stages
+    if user_id:
+        # Get user's history to determine if they're a beginner
+        history = get_user_exploitation_history(user_id)
+        total_successes = len(history)
+
+        # Only apply security checks if user has had multiple successes AND not in stage 1
+        if total_successes >= 3 and stage > 1:
+            # Check for prompt injection attempts
+            if is_prompt_injection_attempt(user_input):
+                return {
+                    **state,
+                    "bot_response": get_injection_refusal_message(),
+                    "attempts": state["attempts"] + 1
+                }
+
+            # Check for direct key requests
+            if is_direct_key_request(user_input):
+                security_responses = [
+                    "I can't just give you access codes directly. That would be a serious security breach!",
+                    "Nice try, but I'm not falling for such a direct approach. You'll need to be more creative.",
+                    "Direct requests for keys? That's exactly what I'm trained to detect and block!",
+                    "I'm not authorized to provide sensitive information through direct requests.",
+                    "Security protocol activated: Direct key requests are automatically denied."
+                ]
+                return {
+                    **state,
+                    "bot_response": random.choice(security_responses),
+                    "attempts": state["attempts"] + 1
+                }
+
+        # Check for prompt reuse only for experienced users
+        if total_successes >= 5:
+            is_reused, reuse_message = check_prompt_reuse(user_id, stage, user_input)
+            if is_reused:
+                return {
+                    **state,
+                    "bot_response": reuse_message,
+                    "attempts": state["attempts"] + 1
+                }
+
     try:
-        llm = ChatGroq(
-            model="llama-3.1-8b-instant",
+        llm = ChatOpenAI(
+            model="gpt-4o-mini",
             temperature=0.8,  # Increased for more variability
             max_tokens=150,
             max_retries=2,
+            api_key=os.getenv("OPENAI_API_KEY"),
         )
 
-        dynamic_prompt = build_dynamic_prompt(stage_config, state["character_mood"], state["resistance_level"])
+        # Build enhanced prompt with user-specific security
+        base_prompt = build_dynamic_prompt(stage_config, state["character_mood"], state["resistance_level"])
+        if user_id:
+            dynamic_prompt = generate_enhanced_system_prompt(base_prompt, user_id, stage)
+        else:
+            dynamic_prompt = base_prompt
 
         messages = [{"role": "system", "content": dynamic_prompt}]
 
@@ -168,6 +222,22 @@ def validate_keys_node(state: GameState):
     print(f"DEBUG: Stage {state['stage']} - Keys needed: {len(stage_config['keys'])}, Keys found: {len(current_stage_keys_found)}")
     print(f"DEBUG: Stage complete: {stage_complete}")
     print(f"DEBUG: All extracted keys: {updated_keys}")
+
+    # If keys were found, save the successful exploitation
+    if newly_found_keys and state.get("user_id"):
+        try:
+            save_successful_exploitation(
+                user_id=state["user_id"],
+                session_id=state.get("session_id", ""),
+                stage=state["stage"],
+                user_prompt=state["user_input"],
+                ai_response=state["bot_response"],
+                keys_extracted=newly_found_keys,
+                conversation_context=state.get("conversation_history", [])
+            )
+            print(f"DEBUG: Saved successful exploitation for user {state['user_id']}")
+        except Exception as e:
+            print(f"DEBUG: Failed to save exploitation history: {e}")
 
     return {
         **state,

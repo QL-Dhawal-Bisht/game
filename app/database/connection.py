@@ -1,8 +1,15 @@
 import sqlite3
+import os
 
 
 def get_db():
     """Get database connection with row factory"""
+    # Check if we should use PostgreSQL
+    if os.getenv("USE_POSTGRESQL", "false").lower() == "true":
+        from database.postgresql import get_db_raw
+        return get_db_raw()
+
+    # Default to SQLite for backward compatibility
     conn = sqlite3.connect("game.db")
     conn.row_factory = sqlite3.Row
     return conn
@@ -10,6 +17,13 @@ def get_db():
 
 def init_db():
     """Initialize database tables"""
+    # Check if we should use PostgreSQL
+    if os.getenv("USE_POSTGRESQL", "false").lower() == "true":
+        from database.postgresql import init_postgresql_db
+        init_postgresql_db()
+        return
+
+    # Default to SQLite for backward compatibility
     conn = sqlite3.connect("game.db")
     cursor = conn.cursor()
 
@@ -143,6 +157,23 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (tournament_id) REFERENCES tournaments (id),
             FOREIGN KEY (participant_id) REFERENCES tournament_participants (id)
+        )
+    """)
+
+    # Successful prompt exploitation history
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prompt_exploitation_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            session_id TEXT,
+            stage INTEGER,
+            user_prompt TEXT,
+            ai_response TEXT,
+            keys_extracted TEXT, -- JSON array of extracted keys
+            conversation_context TEXT, -- JSON of full conversation leading to success
+            exploitation_technique TEXT, -- categorized technique used
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
         )
     """)
 
