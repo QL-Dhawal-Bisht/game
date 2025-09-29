@@ -1,66 +1,164 @@
 #!/usr/bin/env python3
 """
-Setup script for PostgreSQL migration
+Setup script for PostgreSQL database initialization
 """
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
 import sys
 
-def create_env_template():
-    """Create a template .env file with PostgreSQL settings"""
-    env_template = """# PostgreSQL Configuration
-USE_POSTGRESQL=true
-DATABASE_URL=postgresql://username:password@localhost/ai_escape_room
+# Add the app directory to the path so we can import our modules
+sys.path.append('./app')
 
-# Security settings
-SECRET_KEY=your-secret-key-change-this
+# Database connection details
+DB_NAME = "ai_escape_room"
+DB_USER = "gameuser"
+DB_PASS = "gamepass123"
+DB_HOST = "localhost"
 
-# Copy your existing environment variables here
-"""
+def setup_database():
+    """Setup PostgreSQL database with proper permissions"""
 
-    env_file = ".env.postgresql"
-    with open(env_file, "w") as f:
-        f.write(env_template)
+    print("🐘 Setting up PostgreSQL database...")
 
-    print(f"Created {env_file} template file.")
-    print("Please update the DATABASE_URL with your PostgreSQL connection details.")
-    print("Then copy/rename this file to .env to use PostgreSQL.")
+    # Connect as postgres user to create database and user
+    try:
+        # Connect to PostgreSQL server (not specific database)
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            user="postgres",
+            database="postgres"
+        )
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = conn.cursor()
 
-def show_migration_instructions():
-    """Show migration instructions"""
-    instructions = """
-PostgreSQL Migration Instructions:
-=================================
+        # Drop and recreate database for clean setup
+        print(f"📦 Creating database '{DB_NAME}'...")
+        cursor.execute(f"DROP DATABASE IF EXISTS {DB_NAME}")
+        cursor.execute(f"CREATE DATABASE {DB_NAME}")
 
-1. Install PostgreSQL (if not already installed):
-   - Ubuntu/Debian: sudo apt install postgresql postgresql-contrib
-   - macOS: brew install postgresql
-   - Windows: Download from https://www.postgresql.org/download/
+        # Drop and recreate user
+        print(f"👤 Creating user '{DB_USER}'...")
+        cursor.execute(f"DROP USER IF EXISTS {DB_USER}")
+        cursor.execute(f"CREATE USER {DB_USER} WITH PASSWORD '{DB_PASS}'")
 
-2. Create a database:
-   sudo -u postgres createdb ai_escape_room
-   # Or with a specific user:
-   createdb -U username ai_escape_room
+        # Grant all privileges
+        cursor.execute(f"GRANT ALL PRIVILEGES ON DATABASE {DB_NAME} TO {DB_USER}")
+        cursor.execute(f"ALTER USER {DB_USER} CREATEDB")
 
-3. Update your .env file with PostgreSQL settings:
-   USE_POSTGRESQL=true
-   DATABASE_URL=postgresql://username:password@localhost/ai_escape_room
+        cursor.close()
+        conn.close()
 
-4. Run the migration:
-   python migrate_to_postgresql.py
+        print("✅ Database and user created successfully!")
 
-5. Your SQLite database will be backed up automatically.
+    except psycopg2.Error as e:
+        print(f"❌ Error setting up database: {e}")
+        return False
 
-6. Start your application - it will now use PostgreSQL!
+    # Connect to the new database and set up schema permissions
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user="postgres"
+        )
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = conn.cursor()
 
-Note: All existing functionality will remain the same.
-"""
-    print(instructions)
+        print("🔐 Setting up schema permissions...")
+        cursor.execute(f"GRANT ALL ON SCHEMA public TO {DB_USER}")
+        cursor.execute(f"GRANT CREATE ON SCHEMA public TO {DB_USER}")
+        cursor.execute(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {DB_USER}")
+        cursor.execute(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {DB_USER}")
+
+        cursor.close()
+        conn.close()
+
+        print("✅ Schema permissions set successfully!")
+
+    except psycopg2.Error as e:
+        print(f"❌ Error setting up schema permissions: {e}")
+        return False
+
+    return True
+
+def initialize_tables():
+    """Initialize game tables using our existing init function"""
+    print("📋 Initializing game tables...")
+
+    # Set environment variables
+    os.environ['USE_POSTGRESQL'] = 'true'
+    os.environ['DATABASE_URL'] = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
+
+    try:
+        from database.connection import init_db
+        init_db()
+        print("✅ All game tables initialized successfully!")
+        return True
+    except Exception as e:
+        print(f"❌ Error initializing tables: {e}")
+        return False
+
+def test_connection():
+    """Test the database connection and show tables"""
+    print("🔍 Testing database connection...")
+
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS
+        )
+        cursor = conn.cursor()
+
+        # List all tables
+        cursor.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name
+        """)
+        tables = cursor.fetchall()
+
+        print("📊 Tables in database:")
+        for table in tables:
+            print(f"  ✓ {table[0]}")
+
+        cursor.close()
+        conn.close()
+
+        print("✅ Database connection test successful!")
+        return True
+
+    except psycopg2.Error as e:
+        print(f"❌ Connection test failed: {e}")
+        return False
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--env-template":
-        create_env_template()
-    else:
-        show_migration_instructions()
+    print("🎮 AI Escape Room - PostgreSQL Setup")
+    print("=" * 50)
 
-        if input("\nCreate .env template file? (y/N): ").lower() == 'y':
-            create_env_template()
+    # Step 1: Setup database and user
+    if not setup_database():
+        print("❌ Database setup failed!")
+        exit(1)
+
+    # Step 2: Initialize tables
+    if not initialize_tables():
+        print("❌ Table initialization failed!")
+        exit(1)
+
+    # Step 3: Test connection
+    if not test_connection():
+        print("❌ Connection test failed!")
+        exit(1)
+
+    print("=" * 50)
+    print("🎉 PostgreSQL setup completed successfully!")
+    print(f"📝 Database: {DB_NAME}")
+    print(f"👤 User: {DB_USER}")
+    print(f"🔗 Connection: postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}")
+    print("")
+    print("💡 Your application is now configured to use PostgreSQL!")
+    print("💡 Restart your FastAPI server to use the new database.")

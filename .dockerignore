@@ -1,0 +1,57 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+app/.venv/
+
+# Node.js
+ui/node_modules
+ui/.next
+ui/out
+ui/build
+ui/coverage
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local databases
+*.db
+*.sqlite
+game.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.coverage
+.pytest_cache
+.tox
+
+# Build artifacts
+dist/
+build/
